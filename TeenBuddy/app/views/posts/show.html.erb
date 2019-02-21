@@ -1,0 +1,362 @@
+<header class="page-header bg-img size-lg" style="background-image: url(/assets/img/bg-banner1.jpg)">
+  <div id="fb-root"></div>
+  <script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.11&appId=478437375640740';
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));</script>
+
+  <div class="container">
+    <%if notice%>
+
+        <div class="alert alert-info">
+          <strong>Heads up!</strong> <%= notice %>
+        </div>
+
+    <%end%>
+    <div class="header-detail">
+    <span class="fa-stack fa-lg fa-3x col-xs-12 col-sm-2">
+          <i class="fa <%= @post.service_category.get_fa %> fa-stack-1x"></i>
+    </span>
+      <div class="hgroup">
+        <h1><%= @post.title %></h1>
+
+         <div class="teenager_rating">
+                <h3> <%=link_to "#{@post.client.fname} #{@post.client.lname}", client_path(@post.client)%> 
+                <%if @post.client.get_service_counts > minimum_review_numbers %>
+                <div class="stars-outer">
+                  <div id=<%= @post.client.get_average_rating %> class="stars-inner"></div>
+                </div>
+                <%end%>
+
+              </h3>
+              </div>
+            
+      </div>
+      <time datetime=<%= @post.created_at %>>Created at <%= @post.created_at %></time>
+      <hr>
+      <h3>Description</h3>
+      <p class="lead"><%= @post.description %></p>
+      <% if @post.requirements != "" %>
+        <h3>Requirements</h3>
+          <div class="tag-list">
+            <% @post.tag_list.split(",") do |tag| %>
+            <span>
+              <%= tag %> <%= "   " %>
+            </span>
+            <% end %>
+
+          </div>
+      <%end%>
+
+      <ul class="details cols-2">
+        <li>
+          <i class="fa fa-map-marker"></i>
+          <span><%= @post.work_address %></span>
+        </li>
+
+        <li>
+          <i class="fa fa-list-alt"></i>
+          <span><%= "#{@post.service_category.title} - #{@post.service_type.title}" %></span>
+        </li>
+
+        <li>
+          <i class="fa fa-money"></i>
+          <span>Pay: $<%= @post.pay %></span>
+        </li>
+
+        <li>
+          <i class="fa fa-male"></i>
+          <span>Teenagers needed: <%= @post.number_of_teenager_needed %></span>
+        </li>
+
+        <li>
+          <i class="fa fa-certificate"></i>
+          <span>Status: <%= @post.hasPosition %></span>
+        </li>
+      </ul>
+
+      <div class="form-group col-xs-12 col-sm-12" style="height:500px;" id="post_show_map"></div>
+        <div id="infowindow-content">
+          <img src="" width="16" height="16" id="place-icon">
+          <span id="place-name"  class="title"></span><br>
+          <span id="place-address"></span>
+        </div>
+      <script>
+        var show_address = "<%== escape_javascript @post.work_address %>";
+        var post_id = "<%== escape_javascript @post.id.to_s %>";
+      </script>
+
+      <div class="button-group">
+        <ul class="social-icons">
+          <li class="title">Share on</li>
+          <li><a class="fa fa-facebook fb-xfbml-parse-ignore" target="_blank" href="http://www.facebook.com/share.php?u=https%3A%2F%2Fishuhui.com&title=<%=@post.title%>"></a></li>
+          <li><a class="google-plus" href="#"><i class="fa fa-google-plus"></i></a></li>
+          <li><a class="twitter" href="#"><i class="fa fa-twitter"></i></a></li>
+          <li><a class="linkedin" href="#"><i class="fa fa-linkedin"></i></a></li>
+        </ul>
+
+        <div class="action-buttons">
+          <% if current_user.teenager %>
+              <%= link_to "Chat with #{@post.client.fname}", '#', :class => 'btn btn-primary', 'data-toggle' => 'modal', 'data-target' => '#messageModal' %>
+              <% if (teenager_service=@post.applicable(current_user.teenager)) == 'applicable' %>
+                  <%= link_to 'Apply now', '#', :class => 'btn btn-success', 'data-toggle' => 'modal', 'data-target' => '#applyModal' %>
+              <% else %>
+                  <button type="button" class="btn btn-primary"><%= teenager_service %></button>
+              <% end %>
+          <% elsif current_user.client == @post.client %>
+              <%= link_to 'Edit', edit_post_path(@post), class: 'btn btn-gray' %>
+              <%= link_to 'Delete', { action: :destroy, id: @post.id }, method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger'  %>
+          <% end %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<% if current_user.teenager %>
+    <div id="applyModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <%= form_for(:service, url: services_url, method: :post) do |form| %>
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Apply this job.</h4>
+              </div>
+              <div class="modal-body">
+                <%= form.hidden_field :post_id, value: @post.id %>
+                <%= form.hidden_field :teenager_id, value: current_user.teenager.id %>
+                <%= form.hidden_field :status, value: :applied %>
+                <%= form.hidden_field :enrollType, value: true %>
+                <div class="form-group">
+                  <%= form.text_area :applyMessage, class: "form-control", placeholder: "Leave some Message to show yourself." %>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <%= form.submit 'Submit', :class => "btn btn-success" %>
+
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+    <div id="messageModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <%= form_tag messages_path, method: :post do %>
+              <div class="modal-body">
+                 <h4 class="text-center">Send to <strong><%=" #{@post.client.fname} #{@post.client.lname}"%></strong></h4>
+                <div class="form-group">
+                  <%= label_tag 'message[subject]', 'Subject' %>
+               <p class="emoji-picker-container">
+                  <%= text_field_tag 'message[subject]', nil, class: 'form-control',  data: { emojiable: true } ,required: true %>
+                </p>
+                </div>
+
+                <div class="form-group ">
+                  <%= label_tag 'message[body]', 'Message' %>
+                    <p class="emoji-picker-container">
+                   <%= text_area_tag 'message[body]', nil, cols: 3, class: 'form-control', data: { emojiable: true }, required: true %>
+                 </p>
+                </div>
+
+                <%= hidden_field_tag 'recipients', @post_client %>
+              </div>
+              <div class="modal-footer">
+
+                <%= submit_tag 'Send', class: 'btn btn-primary' %>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+              </div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+<% end %>
+
+<main>
+  <% if current_user.client == @post.client && (post_service = Service.where(:client_id => current_user.client, :post_id => @post.id, :status => [ :enrolled, :finished, :confirmed])).any? %>
+      <section class="no-padding-top bg-alt">
+        <header class="section-header">
+          <h2>On Service Teenagers</h2>
+        </header>
+        <div class="container">
+          <div class="row item-blocks-condensed">
+
+            <% post_service.each do |service| %>
+                <div class="row">
+                  <!-- Candidate item -->
+                  <div class="col-xs-12">
+                    <div class="col-xs-12">
+                      <div class="item-block">
+                        <header>
+                          <img src="<%= [service.teenager.selfie.thum.url, UiFaces.face].find(&:itself)%>"alt="avatar">
+
+                          <div class="hgroup">
+                            <h4><%=link_to service.teenager.fname,  teenager_path(service.teenager)%></h4>
+                            <h5><label class= "btn btn-xs <%=status_style2(service.status)%>"> <%= status_text2(service.status) %> </label></h5>
+                            <%if service.teen_review %>
+                                <h6><strong>My Rating: </strong><%for i in 0...service.teen_rating.round %> <span class="icon"><font color = orange>★</font></span> <%end%></h6><h6><%=service.teen_review%>
+                          </h6><%end%>
+                            <%if service.client_review %>
+                                <h6><strong>Teenager's Rating: </strong><%for i in 0...service.client_rating.round %> <span class="icon"> <font color = orange>★</font></span> <%end%></h6><h6><%=service.client_review%>
+                          </h6><%end%>
+
+                          </div>
+                          <div class="header-meta">
+                            <span class="location"><%=service.teenager.home_address%></span>
+                            <span class="rate"><%= service.post.pay%></span>
+                          </div>
+                        </header>
+                        <footer>
+                          <p class="status"><strong>Updated at </strong><%= service.updated_at %></p>
+                          <div class="action-btn">
+                            <%if service.finished?%>
+                            <%=link_to('Confirm',  service_path(service, :service => {:status => :confirmed}), :method => :put, data: {confirm: "Are you sure?"}, class: 'btn btn-xs btn-success')%>
+                            <%elsif service.confirmed? and !service.teen_rating%> 
+                               <%= link_to 'Rate Teenager', '#', :class => 'btn btn-xs btn-info', 'data-toggle' => 'modal', 
+                            'data-target' =>  "#messageModal#{service.id}" %>
+                          <%end%>
+                                </div>
+                        </footer>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- END Candidate item -->
+                </div>
+            <% end %>
+            <!-- END Job item -->
+          </div>
+        </div>
+      </section>
+  <% end %>
+
+<% if current_user.client == @post.client && (@post.hasPosition == 'open')&& (post_service = Service.where(:client_id => current_user.client, :post_id => @post.id, :status => [ :applied, :beingInvited])).any? %>
+
+    <section class="no-padding-top bg-alt">
+        <header class="section-header">
+          <h2>Candidates</h2>
+        </header>
+        <div class="container">
+          <div class="row item-blocks-condensed">
+
+            <% post_service.each do |service| %>
+                <div class="row">
+                  <!-- Candidate item -->
+                  <div class="col-xs-12">
+                    <div class="col-xs-12">
+                      <div class="item-block">
+                        <header>
+                        <img src="<%= [service.teenager.selfie.thum.url, UiFaces.face].find(&:itself)%>"alt="avatar">
+                          <div class="hgroup">
+                            <h4><%=link_to service.teenager.fname,  teenager_path(service.teenager)%></h4>
+                            <h5><label class= "btn btn-xs <%=status_style(service.status)%>"> <%= status_text(service.status) %> </label></h5>
+                          </div>
+                          <div class="header-meta">
+                            <span class="location"><%=service.teenager.home_address%></span>
+                            <span class="rate"><%= service.post.pay%></span>
+                          </div>
+                        </header>
+
+                        <footer>
+                          <div class="status"><strong><%= service.status %> at </strong><%=service.updated_at%></div>
+                          <div class="action-btn">
+                            <%if service.applied?%>
+                                <%=link_to('Approve', service_path(service, :service => {:status => :enrolled}), :method => :put, data: {confirm: "Are you sure?"}, class: 'btn btn-xs btn-success')%>
+                                <%=link_to('Reject',  service_path(service, :service => {:status => :rejected}), :method => :put, data: {confirm: "Are you sure?"}, class: 'btn btn-xs btn-danger')%>
+                            <%end%>
+                          </div>
+                        </footer>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- END Candidate item -->
+                </div>
+            <% end %>
+            <!-- END Job item -->
+          </div>
+        </div>
+      </section>
+  <% end %>
+</main>
+
+<!-- Fake Pop Up window Form -->
+<% if current_user.client == @post.client && (post_service = Service.where(:client_id => current_user.client, :post_id => @post.id, :status => [ :enrolled, :finished, :confirmed])).any? %>
+     <% post_service.each do |service| %>
+
+<div id=<%= "messageModal#{service.id}" %> class="modal fade" role="dialog"> 
+
+      <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" style="text-align: center">Rate Teenager.</h4>
+        </div>
+  <div style="text-align: center">
+  <form class="rating">
+  <label>
+    <input type="radio" id=<%="rating-1:#{service.id}"%> name="stars" value="1" />
+    <span class="icon">★</span>
+  </label>
+  <label>
+    <input type="radio" id=<%="rating-2:#{service.id}"%>  name="stars" value="2" />
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+  </label>
+  <label>
+    <input type="radio"  id=<%="rating-3:#{service.id}"%>  name="stars" value="3" />
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+    <span class="icon">★</span>   
+  </label>
+  <label>
+    <input type="radio"   id=<%="rating-4:#{service.id}"%> name="stars" value="4" />
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+  </label>
+  <label>
+    <input type="radio"   id=<%="rating-5:#{service.id}"%> name="stars" value="5" />
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+    <span class="icon">★</span>
+  </label>
+</form>
+</div>
+          <%= form_for :service, url:service_path(service),:method =>:PUT do |form| %>
+
+              <div class="modal-body">
+            <div class="form-group">
+                  <%= form.hidden_field :teen_rating, :id=>"email_field#{service.id}" ,class: "form-control", placeholder: "Rate teenager " %>
+                  <p class="emoji-picker-container">
+                  <%= form.text_area :teen_review, class: "form-control", placeholder: "Comments about your client",data: { emojiable: true }%>
+                </p>
+                 </div>
+            </div>
+              <div class="modal-footer">
+                <%= form.submit 'Submit', :class => "btn btn-success" %>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+     <%end%>
+ <%end%>
+
+<a id="scroll-up" href="#"><i class="ti-angle-up"></i></a>
+

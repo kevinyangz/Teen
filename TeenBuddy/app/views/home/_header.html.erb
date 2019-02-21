@@ -1,0 +1,111 @@
+
+<body class="nav-on-header smart-nav">
+
+<!-- Navigation bar -->
+<nav class="navbar">
+  <div class="container">
+
+    <!-- Logo -->
+    <div class="pull-left">
+      <a class="navbar-toggle" href="#" data-toggle="offcanvas"><i class="ti-menu"></i></a>
+
+      <div class="logo-wrapper">
+
+        <%= link_to image_tag("/assets/img/logo.png", border: 0), home_index_path, class: 'logo', method: :get %></a>
+        <%= link_to image_tag("/assets/img/logo-alt.png", border: 0), home_index_path, class: 'logo-alt', method: :get %></a>
+      </div>
+    </div>
+    <!-- END Logo -->
+
+    <% if !current_user %>
+      <div class="pull-right user-login">
+        <%= link_to('Login', new_user_session_path, class: 'btn btn-sm btn-primary')%><%= link_to('Register', new_user_registration_path, class: 'btn btn-sm btn-success')%>
+      </div>
+        <!-- END User account -->
+    <%elsif current_user.teenager%>
+      <div class="pull-right">
+        <div class="dropdown user-account">
+          <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+            <img src="<%= [UiFaces.face, current_user.teenager.selfie.thum.url].find(&:itself)%>"alt="avatar">
+          </a>
+          <b><%="#{current_user.teenager.fname} #{current_user.teenager.lname}"%></b>
+         <ul class="dropdown-menu dropdown-menu-right">
+
+           <li><%= link_to 'Profile', current_user.teenager %></li>
+           <li><%= link_to 'Conversations', conversations_path %></li>
+           <li><%= link_to 'Credit', charges_path %></li>
+           <li> <%= link_to('Logout', destroy_user_session_path, method: :delete) %></li>
+          </ul>
+        </div>
+      </div>
+    <%else%>
+      <div class="pull-right">
+        <div class="dropdown user-account">
+          <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+
+            <img src="<%= [current_user.client.selfie.thum.url, UiFaces.face].find(&:itself) %>" alt="avatar">
+
+          </a>
+          <b><%="#{current_user.client.fname} #{current_user.client.lname}"%></b>
+          <ul class="dropdown-menu dropdown-menu-right">
+
+            <li><%= link_to 'Profile', current_user.client %></li>
+            <li><%= link_to 'Conversations', conversations_path %></li>
+            <li><%= link_to 'Credit', charges_path %></li>
+            <li> <%= link_to('Logout', destroy_user_session_path, method: :delete) %></li>
+          </ul>
+        </div>
+      </div>
+    <%end%>
+
+    <% if !current_user %>
+        <ul class="nav-menu">
+          <li><%= link_to 'Job Market' , posts_path(status:"open", updated_at:"updated time", per_page:5)%></li>
+          <li><%= link_to 'Clients' , clients_path%></li>
+          <li><%= link_to 'Teenagers' , teenagers_path%></li>
+          <li><%= link_to 'About' , home_aboutus_path%></li>
+          <li><%=link_to 'Contact Us', home_contactus_path%></li>
+        </ul>
+
+    <% elsif current_user.teenager %>
+        <ul class="nav-menu">
+          <li><%= link_to 'Job Market' , posts_path(status:"open", order:"updated_at", per_page:5)%></li>
+          <li><%= link_to 'Clients' , clients_path%></li>
+          <li><%= link_to 'About' , home_aboutus_path%></li>
+          <li><%=link_to 'Contact Us', home_contactus_path%></li>
+          <li>
+            <a>Job Center</a>
+            <ul>
+              <li><%= link_to 'My Jobs', services_path %></li>
+              <li><%= link_to 'Offers' ,  services_invitations_path%></li>
+              <li><%= link_to 'Applications' ,  services_applications_path %></li>
+            </ul>
+          </li>
+        </ul>
+        <% elsif current_user.client %>
+            <ul class="nav-menu">
+              <li><a><%= link_to 'Job Market' , posts_path(status:"open", updated_at:"updated time", per_page:5)%></a>
+              <ul>
+                <li><%= link_to 'All Posts' , posts_path(status:"open", updated_at:"updated time", per_page:5)%></li>
+                <li><%= link_to 'Write a new Post' , new_post_path%></li>
+              </ul></li>
+              <li><%= link_to 'Teenagers' , teenagers_path%></li>
+              <li><%= link_to 'About' , home_aboutus_path%></li>
+              <li><%=link_to 'Contact Us', home_contactus_path%></li>
+              <li>
+                <a>Job Center</a>
+                <ul>
+                  <li><%= link_to 'My Posts', posts_path(client_id: current_user.client.id, per_page:5, updated_at:"updated time") %></li>
+                  <li><%= link_to 'Invitations' ,  services_invitations_path%></li>
+                  <li><%= link_to 'Applications' ,  services_applications_path%></li>
+                </ul>
+              </li>
+            </ul>
+        <%end%>
+
+    <!-- User account -->
+
+  </div>
+</nav>
+<!-- END Site header -->
+</body>

@@ -1,0 +1,234 @@
+<header class="page-header bg-img" style="background-image: url(/assets/img/teenagers.jpg);">
+  <div class="container">
+    <% if notice %>
+        <div class="alert alert-info">
+          <strong>Heads up!</strong> <%= notice %>
+        </div>
+    <% end %>
+    <div class="row">
+
+      <div class="col-xs-12 col-sm-4 ">
+        <% if @teenager.selfie.present? %>
+            <%= image_tag(@teenager.selfie.thum.url) %>
+            <!-- User upload picture -->
+        <% else %>
+            <%= image_tag("/assets/img/teenager.jpg", ) %>
+
+      <% end %>
+      </div>
+      <div class="col-xs-12 col-sm-8 header-datail">
+        <div class="hgroup">
+
+          <h1><%= @teenager.fname %>  <%= @teenager.lname %>   </h1>
+          <% if (endorse=Endorsement.where(liked: @teenager.user.id, liker: current_user.id)).any? %>
+              <%= link_to endorsement_path(endorse.first), :method => :delete do %>
+                  <i class="fa fa-heart"></i>
+              <% end %>
+
+          <% else %>
+              <%= link_to endorsements_path(:endorsement => {:liked => @teenager.user.id, :liker => current_user.id}), :method => :post do %>
+                  <i class="fa fa-heart-o"></i>
+              <% end %>
+          <% end %>
+          <%= Endorsement.where(liked: @teenager.user.id).count %>
+            <%if @teenager.get_service_numbers >minimum_review_numbers %>
+            <div class="teenager_rating">
+                <div class="stars-outer">
+                  <div id=<%= @teenager.get_average_rating %> class="stars-inner"></div>
+                </div>
+                <strong> <%= "  #{@teenager.get_service_numbers} Reviews" %></strong>
+              </div>
+              <%end%>
+
+          <div class="tag-list">
+            <% @teenager.tag_list.split(",") do |tag| %>
+            <span>
+              <%= tag %> <%= "   " %>
+            </span>
+            <% end %>
+
+          </div>
+        </div>
+         <hr>
+        <p class="lead"><%= @teenager.description %> </p>
+        <ul class="details cols-2">
+          <li>
+            <i class="fa fa-home"></i>
+            <span><%= @teenager.home_address %></span>
+          </li>
+
+
+          <li>
+            <i class="fa fa-map-marker"></i>
+            <a><%= @teenager.postal_code %></a>
+          </li>
+
+          <li>
+            <i class="fa fa-birthday-cake"></i>
+            <span><%= @teenager.birth_date %></span>
+          </li>
+
+          <li>
+            <i class="fa fa-child"></i>
+            <span><%= "#{@age} years-old" %></span>
+          </li>
+
+          <li>
+            <i class="fa fa-phone"></i>
+            <span><%= @teenager.cell_phone %></span>
+          </li>
+
+          <li>
+            <i class="fa fa-envelope"></i>
+            <a href="#"><%= User.find(@teenager.user_id).email %></a>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+      <div class="button-group">
+        <ul class="social-icons">
+          <li><a class="facebook" href="#"><i class="fa fa-facebook"></i></a></li>
+          <li><a class="twitter" href="#"><i class="fa fa-twitter"></i></a></li>
+          <li><a class="dribbble" href="#"><i class="fa fa-dribbble"></i></a></li>
+          <li><a class="linkedin" href="#"><i class="fa fa-linkedin"></i></a></li>
+          <li><a class="instagram" href="#"><i class="fa fa-instagram"></i></a></li>
+        </ul>
+
+
+        <div class="action-buttons">
+          <% if current_user.client!=nil %>
+            <%= link_to "Chat with #{@teenager.fname}", '#', :class => 'btn btn-primary', 'data-toggle' => 'modal', 'data-target' => '#messageModal' %>
+              <%= link_to 'Invite me', '#', :class => 'btn btn-success', 'data-toggle' => 'modal', 'data-target' => '#inviteModal' %>
+          <% end %>
+          <% if current_user.teenager && current_user.teenager.id == @teenager.id %>
+              <%= link_to 'Edit', edit_teenager_path(@teenager), class: 'btn btn-gray' %>
+          <% end %>
+        </div>
+
+        <!-- Trigger the modal with a button -->
+
+        <!-- Modal -->
+
+
+      </div>
+    </div>
+  </div>
+
+</header>
+<!-- END Page header -->
+<% if current_user.client %>
+    <div id="inviteModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <%= form_for(:service, url: services_url, method: :post) do |form| %>
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Invite teenager to your jobs.</h4>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <h6>My open jobs</h6>
+                  <%= collection_select(:service, :post_id, Post.where(:client_id => current_user.client.id).all.select {|c| c.hasPosition == 'open'}, :id, :title, {:prompt => 'Please select a job for teenager.'}, {class: 'form-control selectpicker'}) %>
+                </div>
+
+                <%= form.hidden_field :teenager_id, value: @teenager.id %>
+                <%= form.hidden_field :status, value: :beingInvited %>
+                <%= form.hidden_field :enrollType, value: false %>
+
+                <div class="form-group">
+                  <h6>Message</h6>
+                      <p class="emoji-picker-container">
+                    <%= form.text_area :inviteMessage, class: "form-control",  data: { emojiable: true },placeholder: "Leave some Message to convince him." %>
+                 </p>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <%= form.submit 'Submit', :class => "btn btn-success" %>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+<div id="messageModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <%= form_tag messages_path, method: :post do %>
+              <div class="modal-body">
+                <h4 class="text-center">Send to <strong><%=" #{@teenager.fname}  #{@teenager.lname}"%></strong></h4>
+                <div class="form-group">
+                  <%= label_tag 'message[subject]', 'Subject' %>
+               <p class="emoji-picker-container">
+                  <%= text_field_tag 'message[subject]', nil, class: 'form-control',  data: { emojiable: true } ,required: true %>
+                </p>
+                </div>
+
+                <div class="form-group ">
+                  <%= label_tag 'message[body]', 'Message' %>
+                    <p class="emoji-picker-container">
+                   <%= text_area_tag 'message[body]', nil, cols: 3, class: 'form-control', data: { emojiable: true }, required: true %>
+                 </p>
+                </div>
+                <%= hidden_field_tag 'recipients', @teenager.user_id %>
+              </div>
+              <div class="modal-footer">
+
+                <%= submit_tag 'Send', class: 'btn btn-primary' %>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+              </div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+<% end %>
+
+
+
+
+<!-- Main container -->
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 col-lg-9">
+      <div id="comments">
+        <header>
+          <h3>Review
+            <span class=“txt-gray”><%= "(#{Service.where(teenager_id: @teenager.id).where.not("teen_review like ?", "").count})" %></span>
+          </h3>
+        </header>
+        <ul class="comments-list">
+
+          <% Service.where(teenager_id: @teenager.id).where.not("teen_review like ?", "").each do |service| %>
+              <li class="comment">
+
+                <img class="avatar" src="<%= [Client.find(service.client_id).selfie.thum.url, UiFaces.face].find(&:itself)%>" alt="avatar" />
+                    <!-- default picture-->
+                <div class="comment-body">
+                  <h6>
+               <%=link_to "#{Client.find(service.client_id).fname}", Client.find(service.client_id)%> 
+
+                    <time>
+                      <%= service.updated_at %>
+                    </time>
+                  </h6>
+
+                  <p>
+                    <%= service.teen_review %>
+                  </p>
+                </div>
+              </li>
+
+          <% end %>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

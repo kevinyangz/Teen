@@ -1,0 +1,34 @@
+
+<header class="page-header bg-img size-lg" style="background-image: url(assets/img/bg-banner2.jpg)">
+  <div class="container no-shadow">
+    <h1 class="text-center">Reset password</h1>
+
+<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
+  <%= devise_error_messages! %>
+  <%= f.hidden_field :reset_password_token %>
+
+  <div class="field">
+   
+    <h6>New Password</h6>
+    <%= f.password_field :password, autofocus: true, autocomplete: "off",class:'form-control input-lg' %>
+  </div>
+
+  <div class="field">
+    <h6>Confirm Password</h6>
+    <%= f.password_field :password_confirmation, autocomplete: "off",class:'form-control input-lg' %>
+  </div>
+<br>
+<div class="text-center">
+  <div class="actions">
+    <%= f.submit "Change my password", class:'btn btn-primary' %>
+  </div>
+</div>
+<% end %>
+
+
+
+  </div>
+</header>
+
+
+

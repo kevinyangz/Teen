@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TeenBuddy</title>
+    <%= csrf_meta_tags %>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Post a job position or create your online resume by TheJobs!">
+    <meta name="keywords" content="">
+
+    <!-- Styles -->
+    <link href= "/assets/css/app.min.css" rel="stylesheet">
+    <link href="/assets/css/custom.css" rel="stylesheet">
+    <link href="/assets/css/emoji.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Oswald:100,300,400,500,600,800%7COpen+Sans:300,400,500,600,700,800%7CMontserrat:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" href="/assets/img/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEnjCUUqfZfpZUTo_oC4kMK_ZnkmgQscQ&libraries=places"></script>
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+
+
+
+<% if controller.controller_name != "sessions" && controller.controller_name != "registrations"%>
+
+   <%= render 'home/header' %>
+
+    <%= yield %>
+
+    <%= render 'home/footer' %>
+<%else%>
+    <%= yield %>
+<% end %>
+
+
+
+
+
+  <script src="/assets/js/app.min.js"></script>
+   <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/util.js"></script>
+  <script src="/assets/js/jquery.emojiarea.js"></script>
+  <script src="/assets/js/emoji-picker.js"></script>
+</html>

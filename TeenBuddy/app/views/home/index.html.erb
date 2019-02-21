@@ -1,0 +1,134 @@
+<header class="site-header size-lg text-center" style="background-image: url(/assets/img/main.jpg)">
+
+
+  <% if current_user && current_user.client %>
+
+      <div class="container">
+        <div class="col-xs-12">
+          <br><br>
+          <h2>We have
+            <mark><%= Teenager.all.count %></mark>
+            teenagers registered here!
+          </h2>
+          <h5 class="font-alt">Find your desire one in a minute</h5>
+          <br><br><br>
+
+          <%= form_tag(teenagers_path, method: :get, class: 'header-job-search') do %>
+
+              <div class="input-keyword">
+                <%= text_field_tag :keyword, params[:searched_keyword], class: "form-control", placeholder: "Job title, description, or requirements" %>
+              </div>
+              <div class="input-location">
+                <%= text_field_tag :address, params[:address], class: "form-control", placeholder: "Location: city, state or zip" %>
+              </div>
+
+              <div class="btn-search">
+                <%= submit_tag 'Find Teenagers', name: nil, class: 'btn btn-primary' %>
+              </div>
+
+          <% end %>
+
+        </div>
+
+      </div>
+
+  <% else %>
+
+      <div class="container">
+        <div class="col-xs-12">
+          <br><br>
+          <h2>We offer
+            <mark><%= Post.all.count %></mark>
+            jobs right now!
+          </h2>
+          <h2>We have
+            <mark><%= Teenager.all.count %></mark>
+            teenagers registered here!
+          </h2>
+          <h5 class="font-alt">Find your desire one in a minute</h5>
+          <br><br><br>
+
+          <%= form_tag(posts_path(status:"open", updated_at:"updated time", per_page:5), method: :get, class: 'header-job-search') do %>
+
+              <div class="input-keyword">
+                <%= text_field_tag :searched_keyword, params[:searched_keyword], class: "form-control", placeholder: "Job title, description, or requirements" %>
+              </div>
+              <div class="input-location">
+                <%= text_field_tag :address, params[:address], class: "form-control", placeholder: "Location: city, state or zip" %>
+              </div>
+
+              <div class="btn-search">
+                <%= submit_tag 'Find Jobs', name: nil, class: 'btn btn-primary' %>
+              </div>
+
+          <% end %>
+
+        </div>
+
+      </div>
+
+
+  <% end %>
+</header>
+
+
+
+
+<section class="bg-img bg-repeat no-overlay section-sm" style="background-image: url(assets/img/bg-pattern.jpg)">
+  <div class="container">
+
+    <div class="row">
+      <div class="counter col-md-3 col-sm-6">
+        <p><span data-from="0" data-to="<%= Post.all.count%>"></span>+</p>
+        <h6>Jobs</h6>
+      </div>
+
+      <div class="counter col-md-3 col-sm-6">
+        <p><span data-from="0" data-to="<%= User.all.count %>"></span>+</p>
+        <h6>Members</h6>
+      </div>
+
+      <div class="counter col-md-3 col-sm-6">
+        <p><span data-from="0" data-to="<%= Teenager.all.count%>"></span>+</p>
+        <h6>Teenagers</h6>
+      </div>
+
+      <div class="counter col-md-3 col-sm-6">
+        <p><span data-from="0" data-to="<%=Client.all.count%>"></span>+</p>
+        <h6>Clients</h6>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="bg-alt">
+  <div class="container">
+    <header class="section-header">
+      <span>Categories</span>
+      <h2>Popular categories</h2>
+      <p>Here's the most popular categories</p>
+    </header>
+
+    <div class="category-grid">
+
+
+      <% Post.all.group(:service_category).count(:id).sort_by { |name, count | count }.reverse.take(6).each do |category|%>
+
+          <a style="height: 295px;">
+
+
+          <i class="fa <%= category.first.get_fa %>"></i>
+
+            <h6><%=category.first.title%></h6>
+            <p><strong><%=category.second%></strong><%=" jobs about #{category.first.title} "%></p>
+          </a>
+      <%end%>
+
+
+
+
+    </div>
+
+  </div>
+</section>

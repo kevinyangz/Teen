@@ -1,0 +1,102 @@
+<% if @client and @client_form_header_title == "Edit Your Information" and current_user.client != @client %>
+  <%= controller.redirect_to clients_path%>
+<% end %>
+
+<%= form_with(model: client, local: true) do |form| %>
+
+    <header class="page-header bg-img size-lg" style="background-image: url(/assets/img/bg-banner1.jpg)">
+      <div class="container page-name">
+        <h1 class="text-center">Detail Information</h1>
+        <p class="lead text-center">Please complete the form with detailed infomation</p>
+      </div>
+
+      <div class="container">
+
+        <p><font color='red'> <%= client.errors.full_messages.first %></font></p>
+
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+              <%= form.file_field :selfie, class: 'dropify'%>
+              <span class="help-block">Please upload a profile picture.</span>
+            </div>
+          </div>
+
+          <div class="col-xs-12 col-sm-8">
+            <div class="row">
+              <div class="form-group col-xs-12 col-sm-6">
+                <h6>First Name</h6>
+                <%= form.text_field :fname, class: 'form-control input-lg' %>
+              </div>
+
+              <div class="form-group col-xs-12 col-sm-6" >
+                <h6>Last Name</h6>
+                <%= form.text_field :lname, class: 'form-control input-lg' %>
+              </div>
+
+              <div class="form-group  col-xs-12 col-sm-12">
+                <p class="emoji-picker-container">
+                <%= form.text_area :description, id: :client_description, placeholder:"Short description about you", row:3,class: 'form-control input-lg',data: { emojiable: true } %>
+              </p>
+              </div>
+
+              <hr class="hr-lg">
+            </div>
+            <h6>Basic information</h6>
+            <div class="row">
+
+              <div class="form-group col-xs-12 col-sm-6">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon"><i class="fa fa-map-marker"></i></span>
+                  <%= form.text_field :home_address, id: :teenager_home_address, placeholder: "Location, e.g. Melon Park, CA", class: 'form-control input-lg' %>
+                </div>
+              </div>
+
+
+
+
+
+              <div class="form-group col-xs-12 col-sm-6">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon"><i class="fa fa-phone"></i></span>
+                  <%= form.text_field :cell_phone,placeholder:"Cell Phone", class: 'form-control input-lg' %>
+                </div>
+              </div>
+
+              <div class="form-group col-xs-12 col-sm-6">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon"><i class="fa fa-phone"></i></span>
+                  <%= form.text_field :home_phone,placeholder:"Home Phone", class: 'form-control input-lg' %>
+                </div>
+              </div>
+
+
+
+
+            </div>
+
+            <hr class="hr-lg">
+
+
+
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <section class="bg-alt">
+      <div class="container">
+        <header class="section-header">
+          <h1>Are you done?</h1>
+          <p>Please review your information once more and press the button below to save.</p>
+        </header>
+        <div class="actions">
+          <p class="text-center">
+            <%= form.submit 'Submit', class: 'btn btn-success btn-xl btn-round' %>
+          </p>
+        </div>
+      </div>
+    </section>
+<% end %>

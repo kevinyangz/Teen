@@ -1,0 +1,189 @@
+<!-- Page header -->
+<header class="page-header bg-img" style="background-image: url(/assets/img/clients.jpg)">
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-4">
+        <% if @client.selfie.present? %>
+          <%= image_tag(@client.selfie.url)  %>
+        <!-- User upload picture -->
+        <% else %> 
+          <%= image_tag("/assets/img/client.jpg") %>
+        <!-- default picture-->
+        <% end %>
+      </div>
+
+      <div class="col-xs-12 col-sm-8 header-detail">
+        <div class="hgroup">
+         <h4><%= @client.fname %> <%= @client.lname %></h4>
+          <% if (endorse=Endorsement.where(liked: @client.user.id, liker: current_user.id)).any? %>
+              <%= link_to endorsement_path(endorse.first), :method => :delete do %>
+                  <i class="fa fa-heart"></i>
+              <% end %>
+
+          <% else %>
+              <%= link_to endorsements_path(:endorsement => {:liked => @client.user.id, :liker => current_user.id}), :method => :post do %>
+                  <i class="fa fa-heart-o"></i>
+              <% end %>
+          <% end %><%= Endorsement.where(liked: @client.user.id).count %>
+          <% if @client.get_service_counts >minimum_review_numbers %>
+          <div class="teenager_rating">
+                <div class="stars-outer">
+                  <div id=<%= @client.get_average_rating %> class="stars-inner"></div>
+                </div>
+                <strong> <%= "  #{@client.get_service_counts} Reviews" %></strong>
+              </div>
+          <%end%>
+
+
+        <hr>
+        <p class="lead"><%= @client.description %> </p>
+
+        <ul class="details cols-2">
+          <li>
+            <i class="fa fa-map-marker"></i>
+            <span><%= @client.home_address %></span>
+          </li>
+
+          <li>
+            <i class="fa fa-mobile"></i>
+            <span><%= @client.cell_phone %></span>
+          </li>
+
+
+          <li>
+            <i class="fa fa-phone"></i>
+            <span><%= @client.home_phone %></span>
+          </li>
+
+          <li>
+            <i class="fa fa-envelope"></i>
+            <span><%= @client.user.email %></span>
+          </li>
+        </ul>
+      </div>
+      </div>
+    </div>
+
+
+      <div class="button-group">
+        <ul class="social-icons">
+          <li><a class="facebook" href="#"><i class="fa fa-facebook"></i></a></li>
+          <li><a class="twitter" href="#"><i class="fa fa-twitter"></i></a></li>
+          <li><a class="dribbble" href="#"><i class="fa fa-dribbble"></i></a></li>
+          <li><a class="linkedin" href="#"><i class="fa fa-linkedin"></i></a></li>
+          <li><a class="instagram" href="#"><i class="fa fa-instagram"></i></a></li>
+        </ul>
+
+        <div class="action-buttons">
+          <%if current_user.client && current_user.client.id == @client.id%>
+
+          <%= link_to 'Edit', edit_client_path(@client), class: 'btn btn-gray' %>
+<%end%>
+        </div>
+      </div>
+
+
+  </div>
+</header>
+<!-- END Page header -->
+
+
+<!-- Main container -->
+<main>
+
+
+  <!-- END Company detail -->
+
+
+  <!-- Open posts -->
+  <section id="open-positions" class="bg-alt">
+    <div class="container">
+      <header class="section-header">
+        <h2>Open Posts</h2>
+      </header>
+
+      <% @client.posts.order(:updated_at).reverse.each do |post| %>
+        <% if post.hasPosition == "open" %>
+          <div class="col-xs-12">
+            <div class="item-block">
+              <header>
+            <div class= "row">
+            <div class="hgroup col-xs-12 col-sm-8">
+                   <span class="fa-stack fa-lg fa-3x col-xs-12 col-sm-2">
+               <i class="fa <%= post.service_category.get_fa %> fa-stack-1x"></i>
+         </span>    
+              <h4><%= link_to  "#{post.title}", post, class: 'h4'%></h4>
+                 <p><%= post.description %></p>
+                </div>
+                
+                <div class="header-meta col-xs-12 col-sm-4">
+
+                  <i class="fa fa-map-marker"></i>
+                  <span><%= post.work_address %><br/>   </span>
+
+                  <i class="fa fa-money"></i>
+                  <span>$<%= post.pay %></span>
+
+                </div>
+              </header>
+
+              
+              <footer>
+                <p class="status"><strong>Status: </strong><%= post.hasPosition %></p>
+                <!--
+                <% if current_user.client == @client%>
+                  <div class="action-btn">
+                    <%= link_to 'Edit', edit_post_path(post), class: 'btn btn-xs btn-gray' %>
+                    <%= link_to 'Destroy', {action: :destroy, id: post.id}, method: :delete, data: {confirm: 'Are you sure?'}, class: 'btn btn-xs btn-danger' %>
+                  </div>
+                <%end%>-->
+              </footer>
+            </div>
+          </div>
+        <%end%>
+      <% end %>
+    </div>
+  </section>
+  <!-- END Open positions -->
+
+
+</main>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div id="comments">
+        <header >
+          <h3>Review
+            <span class=“txt-gray”><%= "(#{Service.where(client_id: @client.id).where.not("client_review like ?", "").count})" %></span>
+          </h3>
+        </header>
+        <ul class="comments-list">
+
+          <% Service.where(client_id: @client.id).where.not("client_review like ?", "").each do |service| %>
+              <li class="comment">
+                
+                <img class="avatar" src="<%= [Teenager.find(service.teenager_id).selfie.thum.url, UiFaces.face].find(&:itself)%>" alt="avatar" />
+
+                <div class="comment-body">
+                  <h6>
+                    <%=link_to "#{Teenager.find(service.teenager_id).fname}", Teenager.find(service.teenager_id)%> 
+
+                    <time>
+                      <%= service.updated_at %>
+                    </time>
+                  </h6>
+
+                  <p>
+                    <%= service.client_review %>
+                  </p>
+                </div>
+              </li>
+
+          <% end %>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
